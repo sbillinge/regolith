@@ -23,9 +23,3 @@ def test_validate_bad(make_bad_db):
     assert 'Errors found in ' in out
     assert 'NO ERRORS IN DBS' not in out
 
-def test_validate(make_db):
-    repo = make_db
-    os.chdir(repo)
-#    out = main(['validate']).decode('utf-8')
-    out = main(['validate'])
-    assert 'NO ERRORS IN DBS' in out
