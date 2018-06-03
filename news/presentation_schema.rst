@@ -4,7 +4,7 @@
 * Added institutions schema and exemplar
 * Added presentation list builder
 
-**Changed:** None
+**Changed:**
 
 **Deprecated:** None
 
