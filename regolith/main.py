@@ -11,6 +11,7 @@ from regolith import commands
 from regolith import storage
 from regolith.builder import BUILDERS
 from regolith.schemas import SCHEMAS
+from regolith.tools import update_schemas
 
 DISCONNECTED_COMMANDS = {
     "rc": lambda rc: print(rc._pformat()),
@@ -138,9 +139,38 @@ def create_parser():
         action="store_false",
         default=True,
     )
+    bldp.add_argument(
+        "--from",
+        dest="from_date",
+        help="date in form YYYY-MM-DD.  Items will only be built"
+        "if their date or end_date is equal or after this date",
+        default=None,
+    )
+    bldp.add_argument(
+        "--to",
+        dest="to_date",
+        help="date in form YYYY-MM-DD.  Items will only be built"
+        "if their date or begin_date is equal or before this date",
+        default=None,
+    )
+    bldp.add_argument(
+        "--grants",
+        dest="grants",
+        help="specify a grant or a list of grants so items are built only "
+             "if associated with this(these) grant(s)",
+        default=None,
+    )
+    bldp.add_argument(
+        "--people",
+        dest="people",
+        help="specify a person or a list of people such that the build"
+             "will be for only those people",
+        default=None,
+    )
 
     # deploy subparser
-    depp = subp.add_parser("deploy", help="deploys what was built by regolith")
+    depp = subp.add_parser(
+        "deploy", help="deploys what was built by regolith")
 
     # email subparser
     emlp = subp.add_parser("email", help="automates emailing")
@@ -239,10 +269,8 @@ def main(args=None):
     rc._update(ns.__dict__)
     if "schemas" in rc._dict:
         user_schema = copy.deepcopy(rc.schemas)
-        rc.schemas = copy.deepcopy(SCHEMAS)
-        for k in user_schema:
-            for k2, v in user_schema[k].items():
-                rc.schemas[k][k2].update(v)
+        default_schema = copy.deepcopy(SCHEMAS)
+        rc.schemas = update_schemas(default_schema, user_schema)
     else:
         rc.schemas = SCHEMAS
     if ns.cmd in NEED_RC:
@@ -250,7 +278,10 @@ def main(args=None):
     if rc.cmd in DISCONNECTED_COMMANDS:
         DISCONNECTED_COMMANDS[rc.cmd](rc)
     else:
-        with connect(rc) as rc.client:
+        dbs = None
+        if rc.cmd == 'build':
+            dbs = commands.build_db_check(rc)
+        with connect(rc, dbs=dbs) as rc.client:
             CONNECTED_COMMANDS[rc.cmd](rc)
 
 

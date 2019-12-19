@@ -13,6 +13,7 @@ The following contain the regolith schemas and examples in both YAML and JSON/Mo
     blog
     citations
     courses
+    expenses
     grades
     grants
     groups
@@ -23,4 +24,6 @@ The following contain the regolith schemas and examples in both YAML and JSON/Mo
     presentations
     projects
     proposals
+    refereeReports
+    proposalReviews
     students

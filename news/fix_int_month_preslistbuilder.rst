@@ -7,7 +7,6 @@
 **Removed:** None
 
 **Fixed:**
-
- - BUG: total amount now reproduces correctly in grants section
+ * months can now be expressed as ints or strings as per the schema
 
 **Security:** None

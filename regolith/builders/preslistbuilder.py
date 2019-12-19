@@ -30,6 +30,7 @@ from regolith.tools import (
     number_suffix,
 )
 from regolith.stylers import sentencecase, month_fullnames
+from regolith.dates import month_to_int
 
 
 class PresListBuilder(LatexBuilderBase):
@@ -99,6 +100,14 @@ class PresListBuilder(LatexBuilderBase):
 
     def latex(self):
         """Render latex template"""
+        # just a reminder placeholder how to access these.  These
+        # print statements will be removed when the builder is updated
+        # to use them!
+        print(self.rc.from_date)
+        print(self.rc.to_date)
+        print(self.rc.people)
+        print(self.rc.grants)
+
         for group in self.gtx["groups"]:
             grp = group["_id"]
             grpmember_ids = self.group_member_ids(grp)
@@ -168,7 +177,7 @@ class PresListBuilder(LatexBuilderBase):
                     ]
                     authorlist = ", ".join(pres["authors"])
                     pres["authors"] = authorlist
-                    pres["begin_month"] = int(pres["begin_month"])
+                    pres["begin_month"] = month_to_int(pres["begin_month"])
                     pres["date"] = datetime.date(
                         pres["begin_year"],
                         pres["begin_month"],

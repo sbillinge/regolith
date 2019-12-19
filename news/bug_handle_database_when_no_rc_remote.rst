@@ -1,7 +1,7 @@
-**Added:**
- - builder for post-doc ad
+**Added:** None
 
-**Changed:** None
+**Changed:**
+ - removed remote.rc logic from database.xsh
 
 **Deprecated:** None
 

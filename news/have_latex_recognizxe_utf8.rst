@@ -1,6 +1,5 @@
 **Added:**
-
-* Add phone and address to CV and Resume if available
+ * utf8 support in all current latex builder templates
 
 **Changed:** None
 

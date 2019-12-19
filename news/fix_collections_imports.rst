@@ -8,6 +8,6 @@
 
 **Fixed:**
 
-* Makes sure some URLs in CV builder are also latex safe.
+* import from collections.abc not collections
 
 **Security:** None

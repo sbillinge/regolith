@@ -1,8 +1,7 @@
 **Added:** None
 
 **Changed:**
-
-* ``all_documents`` now defaults to a deepcopy to prevent unintended mutation
+ - User supplied schemas now handles new keys in regolith validate.
 
 **Deprecated:** None
 

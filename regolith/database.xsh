@@ -33,8 +33,6 @@ def load_git_database(db, client, rc):
         with indir(dbdir):
             (![git pull upstream master]
              or ![git pull origin master]
-             or ![git pull @(rc.remote) master]
-             or ![git pull @(rc.remote) @(rc.branch)]
              or ![git pull])
     else:
         git clone @(db['url']) @(dbdir)
@@ -145,23 +143,30 @@ def dump_database(db, client, rc):
         raise ValueError('Do not know how to dump this kind of database')
 
 
-def open_dbs(rc):
+def open_dbs(rc, dbs=None):
     """Open the databases
 
     Parameters
     ----------
     rc : RunControl instance
         The rc which has links to the dbs
+    dbs: set or None, optional
+        The databases to load. If None load all, defaults to None
 
     Returns
     -------
     client : {FileSystemClient, MongoClient}
         The database client
     """
+    if dbs is None:
+        dbs = []
     client = CLIENTS[rc.backend](rc)
     client.open()
     chained_db = {}
     for db in rc.databases:
+        # if we only want to access some dbs and this db is not in that some
+        if dbs and db['name'] not in dbs:
+            continue
         if 'blacklist' not in db:
             db['blacklist'] = ['.travis.yml', '.travis.yaml']
         load_database(db, client, rc)
@@ -177,10 +182,10 @@ def open_dbs(rc):
     return client
 
 @contextmanager
-def connect(rc):
+def connect(rc, dbs=None):
     """Context manager for ensuring that database is properly setup and torn
     down"""
-    client = open_dbs(rc)
+    client = open_dbs(rc, dbs=dbs)
     yield client
     for db in rc.databases:
         dump_database(db, client, rc)
