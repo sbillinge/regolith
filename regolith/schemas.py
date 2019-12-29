@@ -339,8 +339,12 @@ EXEMPLARS = {
             },
             {
                 "begin_year": 2002,
+                "begin_month": "Sep",
+                "begin_day": 1,
                 "degree": "B.S. Physics",
                 "end_year": 2006,
+                "end_month": 5,
+                "end_day": 20,
                 "institution": "University of California, Santa Barbara",
                 "location": "Santa Barbara, CA",
                 "other": [
@@ -373,7 +377,11 @@ EXEMPLARS = {
             },
             {
                 "begin_year": 2013,
+                "begin_month": "Jun",
+                "begin_day": 1,
                 "end_year": 2015,
+                "end_month": 3,
+                "end_day": 15,
                 "location": "Madison, WI",
                 "organization": "CNERG, The University of " "Wisconsin-Madison",
                 "department": "Physics",
@@ -1336,6 +1344,8 @@ SCHEMAS = {
             "schema": {
                 "type": "dict",
                 "schema": {
+                    "begin_day": {"required": False,
+                                    "type": "integer"},
                     "begin_month": {"required": False,
                                     "anyof_type": ["string", "integer"],
                                     },
@@ -1352,6 +1362,8 @@ SCHEMAS = {
                         "description": "this employment is/was in"
                                        "a group in groups coll",
                     },
+                    "end_day": {"required": False,
+                                    "type": "integer"},
                     "end_month": {"required": False,
                                   "anyof_type": ["string", "integer"],
                                   },
@@ -1377,11 +1389,15 @@ SCHEMAS = {
             "schema": {
                 "type": "dict",
                 "schema": {
+                    "begin_day": {"required": False,
+                                    "type": "integer",},
                     "begin_month": {"required": False,
                                     "anyof_type": ["string", "integer"],
                                     },
                     "begin_year": {"required": True, "type": "integer"},
                     "department": {"required": False, "type": "string"},
+                    "end_day": {"required": False,
+                                    "type": "integer",},
                     "end_month": {"required": False,
                                   "anyof_type": ["string", "integer"],
                                   },
