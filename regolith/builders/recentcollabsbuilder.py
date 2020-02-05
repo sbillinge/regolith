@@ -17,6 +17,10 @@ from regolith.tools import all_docs_from_collection, filter_publications, \
 from regolith.sorters import doc_date_key, ene_date_key, position_key
 from regolith.builders.basebuilder import LatexBuilderBase, latex_safe
 
+import pandas as pd
+import shutil
+
+
 LATEX_OPTS = ["-halt-on-error", "-file-line-error"]
 
 
@@ -64,7 +68,8 @@ class RecentCollabsBuilder(LatexBuilderBase):
                                            [names for names in
                                             pub.get('author', [])]])
                 people, institutions = [], []
-                for collab in my_collabs:
+                my_collabs_set = set(my_collabs)
+                for collab in my_collabs_set:
                     person = fuzzy_retrieval(all_docs_from_collection(
                             rc.client, "people"),
                                              ["name", "aka", "_id"],
@@ -106,23 +111,31 @@ class RecentCollabsBuilder(LatexBuilderBase):
                             print(
                                 "WARNING: {} missing from institutions".format(
                                     pinst))
-                ppl_names = [(person["name"], i) for
+                ppl_names = [('A', person["name"], i, '', '') for
                              person, i in zip(people, institutions) if
                              person]
                 #                print(set([person["name"] for person in people if person]))
-                print(set([person for person in ppl_names]))
-            emp = p.get("employment", [{"organization": "missing",
+        #print(set([person for person in ppl_names]))
+                emp = p.get("employment", [{"organization": "missing",
                                         "begin_year": 2019}])
-            emp.sort(key=ene_date_key, reverse=True)
-            self.render(
-                "recentcollabs.csv",
-                p["_id"] + ".csv",
-                p=p,
-                title=p.get("name", ""),
-                pubs=pubs,
-                employment=emp,
-                collabs=my_collabs
-            )
+                emp.sort(key=ene_date_key, reverse=True)
+                people_df = pd.DataFrame(ppl_names)
+                out_folder = "_build/recent-collabs/"
+                out_file = 'recent_collaborators.csv'
+                people_df.to_csv(out_folder + out_file, index=False)
+
+                excel_df = pd.read_excel('../templates/coa_template.xlsx')
+                head_part = excel_df.iloc[:49, :].copy()
+                tail_part = excel_df.iloc[49:, :].copy()
+                print(head_part.shape)
+                print(tail_part.shape)
+                print(people_df.shape)
+                concat_df = pd.concat([head_part, people_df, tail_part], ignore_index=True)
+                concat_df.to_excel(out_folder + 'co.xslx')
+                break
+
+
+
 
     def make_bibtex_file(self, pubs, pid, person_dir="."):
         if not HAVE_BIBTEX_PARSER:
