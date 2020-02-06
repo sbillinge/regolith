@@ -18,9 +18,9 @@ from regolith.sorters import doc_date_key, ene_date_key, position_key
 from regolith.builders.basebuilder import LatexBuilderBase, latex_safe
 
 import pandas as pd
-import shutil
 
 
+COAUTHOR_TABLE_OFFFSET = 50
 LATEX_OPTS = ["-halt-on-error", "-file-line-error"]
 
 
@@ -115,24 +115,22 @@ class RecentCollabsBuilder(LatexBuilderBase):
                              person, i in zip(people, institutions) if
                              person]
                 #                print(set([person["name"] for person in people if person]))
-        #print(set([person for person in ppl_names]))
+                #                print(set([person for person in ppl_names]))
                 emp = p.get("employment", [{"organization": "missing",
                                         "begin_year": 2019}])
                 emp.sort(key=ene_date_key, reverse=True)
                 people_df = pd.DataFrame(ppl_names)
                 out_folder = "_build/recent-collabs/"
                 out_file = 'recent_collaborators.csv'
-                people_df.to_csv(out_folder + out_file, index=False)
-
-                excel_df = pd.read_excel('../templates/coa_template.xlsx')
-                head_part = excel_df.iloc[:49, :].copy()
-                tail_part = excel_df.iloc[49:, :].copy()
-                print(head_part.shape)
-                print(tail_part.shape)
-                print(people_df.shape)
+                people_df.to_csv(''.join([out_folder, out_file], index=False) #save csv file
+                coa_excel_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                                              "templates", "coa_template.xlsx"
+                )
+                excel_df = pd.read_excel(coa_excel_file, header=None)
+                head_part = excel_df.iloc[:COAUTHOR_TABLE_OFFFSET, :].copy()
+                tail_part = excel_df.iloc[COAUTHOR_TABLE_OFFFSET:, :].copy()
                 concat_df = pd.concat([head_part, people_df, tail_part], ignore_index=True)
-                concat_df.to_excel(out_folder + 'co.xslx')
-                break
+                concat_df.to_excel(''.join([out_folder, 'coa_table.xlsx']), header=None, index=False)
 
 
 
