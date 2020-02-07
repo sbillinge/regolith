@@ -55,21 +55,33 @@ class RecentCollabsBuilder(LatexBuilderBase):
         gtx["all_docs_from_collection"] = all_docs_from_collection
 
     def get_ppl_inst_info(self, id, months):
-        '''
+        """
         return a list of tuples, (c/a, people, institution, dept, last active) who has collaborated with
         the person with the given id within the given number months from today
-        args:
-            - id: str, name of person of interest
-            - months: int, number of months
-        output: ppl_names, list of (c/a, people, institution, dept, last active)
-            - c/a: categories, either collaborator ('C') or co-author ('A'). here data is pulled
-            from pub list so assuming that all are authors.
-            - people: name
-            - institution: institution
-            - dept: additional info such as email/department to distinguish people with the same name
-                    blank for now
-            - last active: blank for now
-        '''
+        Parameters
+        ----------
+        id : str
+            id of the person of interest (i.e. "sbillinge")
+        months : int
+            number of months from today
+        Returns
+        -------
+        ppl_names : list
+            list of tuples of the form (c/a, people, institution, dept, last active)
+            - c/a : str
+                categories, either collaborator ('C') or co-author ('A'). here data is pulled
+                from publications so assuming that all are authors ('A'). Refer to the excel template
+                'coa_template.xlsx' for more information
+            - people : str
+                name
+            - institution : str
+                institution
+            - dept : str
+                additional info such as email/department to distinguish people with the same name
+                leave blank for now
+            - last active : str
+                leave blank for now
+        """
         rc = self.rc
         since_date = dt.date.today() - relativedelta(months=months)
         for p in self.gtx["people"]:
@@ -139,15 +151,18 @@ class RecentCollabsBuilder(LatexBuilderBase):
                 emp.sort(key=ene_date_key, reverse=True)
         return ppl_names
 
-    def make_csv_and_excel(self, id, months):
-        '''
+    def make_csv_and_excel(self, ppl_names):
+        """
         function to fill in the 'coa_template.xlsx' and make a csv file with the people and institutions
         information, output from self.get_ppl_inst_info(id, months)
-        args: see self.get_ppl_inst_info(id, months) for details of the args
-        output: None, save an excel file "coa_tables.xlsx" and csv 'recent_collaborators.csv'
-        in _build/recent-collabs/
-        '''
-        ppl_names = self.get_ppl_inst_info(id, months)
+        Parameters
+        ----------
+        ppl_names : list
+            list of tuples. each tuple is a row to be added to the csv and the excel files
+        Returns
+        -------
+        None
+        """
         # make csv
         ppl_df = pd.DataFrame(ppl_names)
         ppl_df.columns = ['', 'Name', 'Institution', 'Optional Info (Email/Department)', 'Last Active']
@@ -175,8 +190,17 @@ class RecentCollabsBuilder(LatexBuilderBase):
         wb.save(''.join([out_folder, 'coa_table.xlsx']))
 
     def latex(self):
+        """
+        function that calls the get_ppl_inst_info and make_csv_and_excel methods
+        to produce a .csv and a .xlsx file with information about collaborators who
+        worked with sbillinge in the past 48 months.
+        Returns
+        -------
+        None
+        """
         rc = self.rc
-        self.make_csv_and_excel('sbillinge', 48)
+        ppl_names = self.get_ppl_inst_info("sbillinge", 48)
+        self.make_csv_and_excel(ppl_names)
 
     def make_bibtex_file(self, pubs, pid, person_dir="."):
         if not HAVE_BIBTEX_PARSER:
