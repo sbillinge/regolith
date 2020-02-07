@@ -2,6 +2,9 @@
 import os
 import datetime as dt
 from copy import copy
+from typing import List, Any, Tuple
+import pandas as pd
+import openpyxl
 from dateutil.relativedelta import relativedelta
 
 try:
@@ -17,16 +20,19 @@ from regolith.tools import all_docs_from_collection, filter_publications, \
 from regolith.sorters import doc_date_key, ene_date_key, position_key
 from regolith.builders.basebuilder import LatexBuilderBase, latex_safe
 
-import pandas as pd
-
+# specifying border and font style
+from openpyxl.styles import Font, Border, Side
+font = Font(bold=False, italic=False)
+border = Border(left=Side(border_style='thin', color='00000000'),
+                right=Side(border_style='thin', color='00000000'),
+                top=Side(border_style='thin', color='00000000'),
+                bottom=Side(border_style='thin', color='FF000000'))
 
 COAUTHOR_TABLE_OFFFSET = 50
 LATEX_OPTS = ["-halt-on-error", "-file-line-error"]
 
-
 class RecentCollabsBuilder(LatexBuilderBase):
     btype = "recent-collabs"
-    needed_dbs = ['citations','people','contacts','institutions']
 
     def construct_global_ctx(self):
         super().construct_global_ctx()
@@ -48,12 +54,26 @@ class RecentCollabsBuilder(LatexBuilderBase):
         gtx["citations"] = all_docs_from_collection(rc.client, "citations")
         gtx["all_docs_from_collection"] = all_docs_from_collection
 
-    def latex(self):
+    def get_ppl_inst_info(self, id, months):
+        '''
+        return a list of tuples, (c/a, people, institution, dept, last active) who has collaborated with
+        the person with the given id within the given number months from today
+        args:
+            - id: str, name of person of interest
+            - months: int, number of months
+        output: ppl_names, list of (c/a, people, institution, dept, last active)
+            - c/a: categories, either collaborator ('C') or co-author ('A'). here data is pulled
+            from pub list so assuming that all are authors.
+            - people: name
+            - institution: institution
+            - dept: additional info such as email/department to distinguish people with the same name
+                    blank for now
+            - last active: blank for now
+        '''
         rc = self.rc
-        since_date = dt.date.today() - relativedelta(months=48)
-        person = fuzzy_retrieval(all_docs_from_collection(rc.client, "people"), ['aka', 'name', '_id'], self.rc.people, case_sensitive = False)
+        since_date = dt.date.today() - relativedelta(months=months)
         for p in self.gtx["people"]:
-            if p["_id"] == person["_id"]:
+            if p["_id"] == id:
                 my_names = frozenset(p.get("aka", []) + [p["name"]])
                 pubs = filter_publications(self.gtx["citations"], my_names,
                                            reverse=True, bold=False)
@@ -71,13 +91,13 @@ class RecentCollabsBuilder(LatexBuilderBase):
                 my_collabs_set = set(my_collabs)
                 for collab in my_collabs_set:
                     person = fuzzy_retrieval(all_docs_from_collection(
-                            rc.client, "people"),
-                                             ["name", "aka", "_id"],
-                                             collab)
+                        rc.client, "people"),
+                        ["name", "aka", "_id"],
+                        collab)
                     if not person:
                         person = fuzzy_retrieval(all_docs_from_collection(
                             rc.client, "contacts"),
-                                                 ["name", "aka", "_id"], collab)
+                            ["name", "aka", "_id"], collab)
                         if not person:
                             print(
                                 "WARNING: {} not found in contacts. Check aka".format(
@@ -85,9 +105,9 @@ class RecentCollabsBuilder(LatexBuilderBase):
                         else:
                             people.append(person)
                             inst = fuzzy_retrieval(all_docs_from_collection(
-                            rc.client, "institutions"),
-                                                   ["name", "aka", "_id"],
-                                                   person["institution"])
+                                rc.client, "institutions"),
+                                ["name", "aka", "_id"],
+                                person["institution"])
                             if inst:
                                 institutions.append(inst["name"])
                             else:
@@ -99,11 +119,11 @@ class RecentCollabsBuilder(LatexBuilderBase):
                     else:
                         people.append(person)
                         pinst = person.get("employment",
-                                                [{"organization": "missing"}])[
-                                                   0]["organization"]
+                                           [{"organization": "missing"}])[
+                            0]["organization"]
                         inst = fuzzy_retrieval(all_docs_from_collection(
                             rc.client, "institutions"), ["name", "aka", "_id"],
-                                               pinst)
+                            pinst)
                         if inst:
                             institutions.append(inst["name"])
                         else:
@@ -114,26 +134,49 @@ class RecentCollabsBuilder(LatexBuilderBase):
                 ppl_names = [('A', person["name"], i, '', '') for
                              person, i in zip(people, institutions) if
                              person]
-                #                print(set([person["name"] for person in people if person]))
-                #                print(set([person for person in ppl_names]))
                 emp = p.get("employment", [{"organization": "missing",
-                                        "begin_year": 2019}])
+                                            "begin_year": 2019}])
                 emp.sort(key=ene_date_key, reverse=True)
-                people_df = pd.DataFrame(ppl_names)
-                out_folder = "_build/recent-collabs/"
-                out_file = 'recent_collaborators.csv'
-                people_df.to_csv(''.join([out_folder, out_file], index=False) #save csv file
-                coa_excel_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                                              "templates", "coa_template.xlsx"
-                )
-                excel_df = pd.read_excel(coa_excel_file, header=None)
-                head_part = excel_df.iloc[:COAUTHOR_TABLE_OFFFSET, :].copy()
-                tail_part = excel_df.iloc[COAUTHOR_TABLE_OFFFSET:, :].copy()
-                concat_df = pd.concat([head_part, people_df, tail_part], ignore_index=True)
-                concat_df.to_excel(''.join([out_folder, 'coa_table.xlsx']), header=None, index=False)
+        return ppl_names
 
+    def make_csv_and_excel(self, id, months):
+        '''
+        function to fill in the 'coa_template.xlsx' and make a csv file with the people and institutions
+        information, output from self.get_ppl_inst_info(id, months)
+        args: see self.get_ppl_inst_info(id, months) for details of the args
+        output: None, save an excel file "coa_tables.xlsx" and csv 'recent_collaborators.csv'
+        in _build/recent-collabs/
+        '''
+        ppl_names = self.get_ppl_inst_info(id, months)
+        # make csv
+        ppl_df = pd.DataFrame(ppl_names)
+        ppl_df.columns = ['', 'Name', 'Institution', 'Optional Info (Email/Department)', 'Last Active']
+        out_folder = "_build/recent-collabs/"
+        out_file = "recent_collaborators.csv"
+        ppl_df.to_csv(''.join([out_folder, out_file]), index=False)
+        # fill in excel
+        coa_excel_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                                      "templates", "coa_template.xlsx")
+        # loading excel file
+        wb = openpyxl.load_workbook(coa_excel_file)
+        ws = wb.worksheets[0]
+        num_rows = len(ppl_names)  # number of rows to be added to the excel
+        num_colns = len(ppl_names[0])  # number of columns
+        # add empty rows below the header
+        ws.insert_rows(COAUTHOR_TABLE_OFFFSET + 1, num_rows)
+        # openpyxl index column and row from 1 instead
+        # filling in the info
+        for row_idx in range(1, num_rows + 1):
+            for col_idx in range(1, num_colns + 1):
+                cell = ws.cell(row=row_idx + COAUTHOR_TABLE_OFFFSET, column=col_idx)
+                cell.value = ppl_names[row_idx-1][col_idx - 1]
+                cell.font = font
+                cell.border = border
+        wb.save(''.join([out_folder, 'coa_table.xlsx']))
 
-
+    def latex(self):
+        rc = self.rc
+        self.make_csv_and_excel('sbillinge', 48)
 
     def make_bibtex_file(self, pubs, pid, person_dir="."):
         if not HAVE_BIBTEX_PARSER:
