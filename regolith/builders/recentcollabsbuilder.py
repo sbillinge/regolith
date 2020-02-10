@@ -3,7 +3,6 @@ import os
 import datetime as dt
 from copy import copy
 from typing import List, Any, Tuple
-import pandas as pd
 import openpyxl
 from dateutil.relativedelta import relativedelta
 
@@ -18,7 +17,7 @@ except ImportError:
 from regolith.tools import all_docs_from_collection, filter_publications, \
     is_since, fuzzy_retrieval
 from regolith.sorters import doc_date_key, ene_date_key, position_key
-from regolith.builders.basebuilder import LatexBuilderBase, latex_safe
+from regolith.builders.basebuilder import LatexBuilderBase, BuilderBase, latex_safe
 
 # specifying border and font style
 from openpyxl.styles import Font, Border, Side
@@ -29,6 +28,8 @@ border = Border(left=Side(border_style='thin', color='00000000'),
                 bottom=Side(border_style='thin', color='FF000000'))
 
 COAUTHOR_TABLE_OFFFSET = 50
+NUM_MONTHS = 48
+ID = "sbillinge"
 LATEX_OPTS = ["-halt-on-error", "-file-line-error"]
 
 class RecentCollabsBuilder(LatexBuilderBase):
@@ -56,18 +57,18 @@ class RecentCollabsBuilder(LatexBuilderBase):
 
     def get_ppl_inst_info(self, id, months):
         """
-        return a list of tuples, (c/a, people, institution, dept, last active) who has collaborated with
+        return a list of tuples, (c/a, people, institution) who has collaborated with
         the person with the given id within the given number months from today
         Parameters
         ----------
         id : str
-            id of the person of interest (i.e. "sbillinge")
+            the id of the person for whom the collaborator list is being built (i.e. "sbillinge")
         months : int
-            number of months from today
+            the number of months from today to go back in time when searching for jointly authored papers
         Returns
         -------
-        ppl_names : list
-            list of tuples of the form (c/a, people, institution, dept, last active)
+        ppl : list of tuples
+            each tuple is of the form (c/a, people, institution)
             - c/a : str
                 categories, either collaborator ('C') or co-author ('A'). here data is pulled
                 from publications so assuming that all are authors ('A'). Refer to the excel template
@@ -76,11 +77,6 @@ class RecentCollabsBuilder(LatexBuilderBase):
                 name
             - institution : str
                 institution
-            - dept : str
-                additional info such as email/department to distinguish people with the same name
-                leave blank for now
-            - last active : str
-                leave blank for now
         """
         rc = self.rc
         since_date = dt.date.today() - relativedelta(months=months)
@@ -143,40 +139,34 @@ class RecentCollabsBuilder(LatexBuilderBase):
                             print(
                                 "WARNING: {} missing from institutions".format(
                                     pinst))
-                ppl_names = [('A', person["name"], i, '', '') for
+                ppl = [('A', person["name"], i, '', '') for
                              person, i in zip(people, institutions) if
                              person]
                 emp = p.get("employment", [{"organization": "missing",
                                             "begin_year": 2019}])
                 emp.sort(key=ene_date_key, reverse=True)
-        return ppl_names
+        return ppl
 
-    def make_csv_and_excel(self, ppl_names):
+    def make_excel(self, ppl):
         """
-        function to fill in the 'coa_template.xlsx' and make a csv file with the people and institutions
+        function to fill in the 'coa_template.xlsx' with the people and institutions
         information, output from self.get_ppl_inst_info(id, months)
         Parameters
         ----------
-        ppl_names : list
-            list of tuples. each tuple is a row to be added to the csv and the excel files
+        ppl : list of tuples
+            the collaborator information for the rows in the csv and excel files
         Returns
         -------
         None
         """
-        # make csv
-        ppl_df = pd.DataFrame(ppl_names)
-        ppl_df.columns = ['', 'Name', 'Institution', 'Optional Info (Email/Department)', 'Last Active']
-        out_folder = "_build/recent-collabs/"
-        out_file = "recent_collaborators.csv"
-        ppl_df.to_csv(''.join([out_folder, out_file]), index=False)
         # fill in excel
         coa_excel_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                                       "templates", "coa_template.xlsx")
         # loading excel file
         wb = openpyxl.load_workbook(coa_excel_file)
         ws = wb.worksheets[0]
-        num_rows = len(ppl_names)  # number of rows to be added to the excel
-        num_colns = len(ppl_names[0])  # number of columns
+        num_rows = len(ppl)  # number of rows to be added to the excel
+        num_colns = len(ppl[0])  # number of columns
         # add empty rows below the header
         ws.insert_rows(COAUTHOR_TABLE_OFFFSET + 1, num_rows)
         # openpyxl index column and row from 1 instead
@@ -184,23 +174,24 @@ class RecentCollabsBuilder(LatexBuilderBase):
         for row_idx in range(1, num_rows + 1):
             for col_idx in range(1, num_colns + 1):
                 cell = ws.cell(row=row_idx + COAUTHOR_TABLE_OFFFSET, column=col_idx)
-                cell.value = ppl_names[row_idx-1][col_idx - 1]
+                cell.value = ppl[row_idx-1][col_idx - 1]
                 cell.font = font
                 cell.border = border
-        wb.save(''.join([out_folder, 'coa_table.xlsx']))
+        wb.save(os.path.join(self.bldir, "coa_table.xlsx"))
 
     def latex(self):
         """
         function that calls the get_ppl_inst_info and make_csv_and_excel methods
         to produce a .csv and a .xlsx file with information about collaborators who
-        worked with sbillinge in the past 48 months.
+        worked with ID in the past NUM_MONTHS months. ID and NUM_MONTHS declared at the top
+        of the code.
         Returns
         -------
         None
         """
         rc = self.rc
-        ppl_names = self.get_ppl_inst_info("sbillinge", 48)
-        self.make_csv_and_excel(ppl_names)
+        ppl = self.get_ppl_inst_info(ID, NUM_MONTHS)
+        self.make_excel(ppl)
 
     def make_bibtex_file(self, pubs, pid, person_dir="."):
         if not HAVE_BIBTEX_PARSER:
