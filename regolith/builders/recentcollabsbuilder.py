@@ -49,6 +49,8 @@ class RecentCollabsBuilder(LatexBuilderBase):
         since_date = dt.date.today() - relativedelta(months=48)
         target = self.rc.people if self.rc.people else "sbillinge"
         person = fuzzy_retrieval(all_docs_from_collection(rc.client, "people"), ['aka', 'name', '_id'], target, case_sensitive=False)
+        if not person:
+            raise ValueError("There is no doc associated with person '{}'".format(target))
         for p in self.gtx["people"]:
             if p["_id"] == person["_id"]:
                 my_names = frozenset(p.get("aka", []) + [p["name"]])
