@@ -18,7 +18,6 @@ from regolith.sorters import doc_date_key, ene_date_key, position_key
 from regolith.builders.basebuilder import LatexBuilderBase, latex_safe
 
 LATEX_OPTS = ["-halt-on-error", "-file-line-error"]
-DEFAULT_PERSON = "sbillinge"
 
 
 class RecentCollabsBuilder(LatexBuilderBase):
@@ -48,7 +47,13 @@ class RecentCollabsBuilder(LatexBuilderBase):
     def latex(self):
         rc = self.rc
         since_date = dt.date.today() - relativedelta(months=48)
-        target = self.rc.people if self.rc.people else DEFAULT_PERSON
+        if self.rc.people:
+            target = self.rc.people
+        else:
+            raise ValueError(
+                "No default person."
+                "Use the '--people' in CLI to specify the person."
+            )
         person = fuzzy_retrieval(all_docs_from_collection(rc.client, "people"), ['aka', 'name', '_id'], target, case_sensitive=False)
         if not person:
             raise ValueError("There is no doc associated with person '{}'".format(target))
