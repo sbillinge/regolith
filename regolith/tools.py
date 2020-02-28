@@ -375,6 +375,60 @@ def filter_projects(projects, authors, reverse=False):
     projs.sort(key=id_key, reverse=reverse)
     return projs
 
+def filter_grants_copi(input_grants, names, pi=True, reverse=True, multi_pi=True):
+    """Filter grants by those involved
+
+    Parameters
+    ----------
+    input_grants : list of dict
+        The grants to filter
+    names : set of str
+        The authors to be filtered against
+    pi : bool, optional
+        If True add the grant amount to that person's total amount
+    reverse : bool, optional
+        If True reverse the order, defaults to False
+    multi_pi : bool, optional
+        If True compute sub-awards for multi PI grants, defaults to False
+    """
+    grants = []
+    co_pis = {}
+    total_amount = 0.0
+    subaward_amount = 0.0
+    for grant in input_grants:
+        team_names = set(gets(grant["team"], "name"))
+        if len(team_names & names) == 0:
+            continue
+        grant = deepcopy(grant)
+        person = [x for x in grant["team"] if x["name"] in names][0]
+        if pi:
+            if person["position"].lower() == "pi":
+                total_amount += grant["amount"]
+            else:
+                continue
+        elif multi_pi:
+            grant["subaward_amount"] = person.get("subaward_amount", 0.0)
+            grant["multi_pi"] = any(gets(grant["team"], "subaward_amount"))
+            if co_pis.get(person.get("name")):
+                current_amount = co_pis[person.get("name")]
+                co_pis.update(person.get("name")) = current_amount + person.get("subaward_amount", 0.0)
+            else:
+                 co_pis[person.get("name")] = person.get("subaward_amount", 0.0)
+
+        else:
+            if person["position"].lower() == "pi":
+                continue
+            else:
+                total_amount += grant["amount"]
+                subaward_amount += person.get("subaward_amount", 0.0)
+                grant["subaward_amount"] = person.get("subaward_amount", 0.0)
+                grant["pi"] = [
+                    x for x in grant["team"] if x["position"].lower() == "pi"
+                ][0]
+                grant["me"] = person
+        grants.append(grant)
+    grants.sort(key=ene_date_key, reverse=reverse)
+    return grants, total_amount, subaward_amount, co_pis
 
 def filter_grants(input_grants, names, pi=True, reverse=True, multi_pi=False):
     """Filter grants by those involved
