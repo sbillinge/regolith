@@ -1432,6 +1432,7 @@ SCHEMAS = {
                     "organization": {"required": True, "type": "string"},
                     "other": {"required": False, "type": "list"},
                     "position": {"required": True, "type": "string"},
+                    "co-editors": {"required": False, "type": "list"},
                     # TODO this should be select from in the long run
                     "status": {"required": False, "type": "string"},
                 },
