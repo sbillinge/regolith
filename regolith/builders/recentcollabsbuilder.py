@@ -123,9 +123,10 @@ class RecentCollabsBuilder(LatexBuilderBase):
                 #                print(set([person["name"] for person in people if person]))
                 print(set([person for person in ppl_names]))
             emp = p.get("employment", [{"organization": "missing",
-                                        "begin_year": 2019,
-                                        "co-editors": "what goes here?"}])
+                                        "begin_year": 2019,}])
             emp.sort(key=ene_date_key, reverse=True)
+            if p.get("employment", "position") == "editor":
+                coeditors = p.get("employment", "co-workers")
             self.render(
                 "recentcollabs.csv",
                 p["_id"] + ".csv",

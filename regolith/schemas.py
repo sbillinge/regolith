@@ -1416,6 +1416,7 @@ SCHEMAS = {
                                     "anyof_type": ["string", "integer"],
                                     },
                     "begin_year": {"required": True, "type": "integer"},
+                    "co-workers": {"required": False, "type": "list"},
                     "department": {"required": False, "type": "string"},
                     "end_day": {"required": False, "type": "integer"},
                     "end_month": {"required": False,
@@ -1432,7 +1433,6 @@ SCHEMAS = {
                     "organization": {"required": True, "type": "string"},
                     "other": {"required": False, "type": "list"},
                     "position": {"required": True, "type": "string"},
-                    "co-editors": {"required": False, "type": "list"},
                     # TODO this should be select from in the long run
                     "status": {"required": False, "type": "string"},
                 },
@@ -1564,6 +1564,7 @@ SCHEMAS = {
                               "anyof_type": ["string", "integer"]
                               },
                     "name": {"required": True, "type": "string"},
+                    "role": {"required": False, "type": "dict"},
                     "year": {"required": False, "type": "integer"},
                     "begin_year": {"required": False, "type": "integer"},
                     "end_year": {"required": False, "type": "integer"},
