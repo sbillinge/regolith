@@ -9,9 +9,9 @@ import time
 from copy import deepcopy
 from calendar import monthrange
 
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
-from regolith.dates import month_to_int, date_to_float
+from regolith.dates import month_to_int, date_to_float, beg_end_dates
 from regolith.sorters import doc_date_key, id_key, ene_date_key
 from regolith.chained_db import ChainDB
 
@@ -658,8 +658,9 @@ def dereference_institution(input_record, institutions):
     """
     inst = input_record.get("institution") or input_record.get("organization")
     if not inst:
-        print("WARNING: no institution or organization found in {}".format(
-            input_record["_id"]))
+        error = input_record.get("position") or input_record.get("degree")
+        print("WARNING: no institution or organization but found {}".format(
+            error))
     db_inst = fuzzy_retrieval(institutions, ["name", "_id", "aka"], inst)
     if db_inst:
         input_record["institution"] = db_inst["name"]
@@ -672,7 +673,7 @@ def dereference_institution(input_record, institutions):
                                                    state_country)
         if not db_inst.get("departments"):
             print("WARNING: no departments in {}. {} sought".format(
-                db_inst["_id"], inst))
+                db_inst.get("_id"), inst))
         if "department" in input_record and db_inst.get("departments"):
             input_record["department"] = fuzzy_retrieval(
                 [db_inst["departments"]], ["name", "aka"],
@@ -748,10 +749,47 @@ def update_schemas(default_schema, user_schema):
     for key in user_schema.keys():
         if (key in updated_schema) and isinstance(updated_schema[key],
                                                   dict) and isinstance(
-              user_schema[key], dict):
+            user_schema[key], dict):
             updated_schema[key] = update_schemas(updated_schema[key],
                                                  user_schema[key])
         else:
             updated_schema[key] = user_schema[key]
 
     return updated_schema
+
+
+def is_fully_loaded(appts):
+    status = True
+    earliest, latest = date.today(), date.today()
+    for appt in appts:
+        begin_date, end_date = beg_end_dates(appt)
+        if latest == date.today():
+            latest = end_date
+        appt['begin_date'] = begin_date
+        appt['end_date'] = end_date
+        if begin_date < earliest:
+            earliest = begin_date
+        if end_date > latest:
+            latest = end_date
+    datearray = []
+    timespan = latest - earliest
+    for x in range(0, timespan.days):
+        datearray.append(earliest + timedelta(days=x))
+
+    loading = [0]*len(datearray)
+    for day in datearray:
+        for appt in appts:
+            if appt['begin_date'] <= day <= appt["end_date"]:
+                loading[datearray.index(day)] = loading[datearray.index(day)] + \
+                                                appt.get("loading")
+
+    if max(loading) > 1.0:
+        status = False
+        print("max {} at {}".format(max(loading),
+                datearray[list(loading).index(max(loading))]))
+    elif min(loading) < 1.0:
+        status = False
+        print("min {} at {}".format(min(loading),
+                                    datearray[list(loading).index(min(loading))]
+                                    ))
+    return status
