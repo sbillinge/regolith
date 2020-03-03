@@ -51,7 +51,7 @@ def test_builder(bm, make_db):
         prep_figure()
     if bm == "html":
         os.makedirs("templates/static", exist_ok=True)
-    if bm == "reimb":
+    if bm in ["reimb", "recent-collabs"]:
         subprocess.run(["regolith", "build", bm, "--no-pdf", "--people",
                         "scopatz"], check=True, cwd=repo )
     else:
