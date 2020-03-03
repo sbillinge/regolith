@@ -549,7 +549,8 @@ SCHEMAS = {
             'description': 'This contains the educational information for '
                            'the group member.',
             'required': True,
-            'schema': {'begin_month': {'required': False, 'type': 'string'},
+            'schema': {'advisor': {'required': False, 'type': 'string'},
+                       'begin_month': {'required': False, 'type': 'string'},
                        'begin_year': {'required': True, 'type': 'integer'},
                        'degree': {'required': True, 'type': 'string'},
                        'end_month': {'required': False, 'type': 'string'},
@@ -566,7 +567,8 @@ SCHEMAS = {
             'description': 'Employment information, similar to educational '
                            'information.',
             'required': True,
-            'schema': {'begin_month': {'required': False, 'type': 'string'},
+            'schema': {'advisor': {'required': False, 'type': 'string'},
+                       'begin_month': {'required': False, 'type': 'string'},
                        'begin_year': {'required': True, 'type': 'integer'},
                        'end_month': {'required': False, 'type': 'string'},
                        'end_year': {'required': False, 'type': 'integer'},
