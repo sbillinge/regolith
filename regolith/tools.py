@@ -201,6 +201,34 @@ def filter_grants(input_grants, names, pi=True, reverse=True):
     return grants, total_amount, subaward_amount
 
 
+def filter_advisors(input_contacts, advisors, positions=["PhD", "post-doc"]):
+    """Filter for PhD and post-docs advisors.
+
+    Parameters
+    ----------
+    input_contacts : list of dict
+        The contacts information
+    advisors : list of str
+        The advisors to be filtered for
+    positions : list of str, optional
+        The positions to be filtered for
+    
+    Return
+    ------
+    filtered_contacts: list of dicts
+    """
+    output_contacts = []
+    for contacts in input_contacts:
+        filtered_contacts = {}
+        for advisor in advisors:
+            for position in positions:
+                for person, info in contacts.items():
+                    if advisor == info['advisor'] and position == info['position']:
+                        filtered_contacts[person] = info
+        output_contacts.append(filtered_contacts)
+    return output_contacts
+
+        
 def awards_grants_honors(p):
     """Make sorted awards grants and honors list.
 
