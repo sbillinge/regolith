@@ -425,6 +425,78 @@ def filter_grants(input_grants, names, pi=True, reverse=True, multi_pi=False):
     return grants, total_amount, subaward_amount
 
 
+def filter_grants(input_grants, names, pi=True, reverse=True):
+    """Filter grants by those involved
+
+    Parameters
+    ----------
+    input_grants : list of dict
+        The grants to filter
+    names : set of str
+        The authors to be filtered against
+    pi : bool, optional
+        If True add the grant amount to that person's total amount
+    reverse : bool, optional
+        If True reverse the order, defaults to False
+    """
+    grants = []
+    total_amount = 0.0
+    subaward_amount = 0.0
+    for grant in input_grants:
+        team_names = set(gets(grant['team'], 'name'))
+        if len(team_names & names) == 0:
+            continue
+        grant = deepcopy(grant)
+        person = [x for x in grant['team'] if x['name'] in names][0]
+        if pi:
+            if person['position'].lower() == 'pi':
+                total_amount += grant['amount']
+            else:
+                continue
+        else:
+            if person['position'].lower() == 'pi':
+                continue
+            else:
+                total_amount += grant['amount']
+                subaward_amount += person.get('subaward_amount', 0.0)
+                grant['subaward_amount'] = person.get('subaward_amount',
+                                                      0.0)
+                grant['pi'] = [x for x in grant['team'] if
+                               x['position'].lower() == 'pi'][0]
+                grant['me'] = person
+        grants.append(grant)
+    grants.sort(key=ene_date_key, reverse=reverse)
+    return grants, total_amount, subaward_amount
+
+
+def filter_advisors(input_contacts, advisors, positions=["PhD", "post-doc"]):
+     """Filter for PhD and post-docs advisors.
+
+     Parameters
+     ----------
+     input_contacts : list of dict
+         The contacts information
+     advisors : list of str
+         The advisors to be filtered for
+     positions : list of str, optional
+         The positions to be filtered for
+     
+     Return
+     ------
+     filtered_contacts: list of dicts
+     """
+     output_contacts = []
+     for contacts in input_contacts:
+         filtered_contacts = {}
+         for advisor in advisors:
+             for position in positions:
+                 for person, info in contacts.items():
+                     if advisor == info['advisor'] and position == info['position']:
+                         filtered_contacts[person] = info
+         output_contacts.append(filtered_contacts)
+     return output_contacts
+
+
 def awards_grants_honors(p):
     """Make sorted awards grants and honors list.
 
