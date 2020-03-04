@@ -19,7 +19,7 @@ builder_map = [
     "preslist",
     "reimb",
     "figure",
-    "review-man",
+#    "review-man",
     "recent-collabs"
 ]
 
