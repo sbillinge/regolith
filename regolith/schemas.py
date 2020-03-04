@@ -1366,6 +1366,7 @@ SCHEMAS = {
             "schema": {
                 "type": "dict",
                 "schema": {
+                    "advisor": {"required": False, "type": "string"},
                     "begin_day": {"required": False,
                                     "type": "integer"},
                     "begin_month": {"required": False,
@@ -1411,6 +1412,7 @@ SCHEMAS = {
             "schema": {
                 "type": "dict",
                 "schema": {
+                    "advisor": {"required": False, "type": "string"},
                     "begin_day": {"required": False, "type": "integer"},
                     "begin_month": {"required": False,
                                     "anyof_type": ["string", "integer"],
