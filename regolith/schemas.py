@@ -309,6 +309,7 @@ EXEMPLARS = {
         "bio": "Anthony Scopatz is currently an Assistant Professor",
         "education": [
             {
+                "advisor": "sbillinge",
                 "begin_year": 2008,
                 "degree": "Ph.D. Mechanical Engineering, "
                           "Nuclear and Radiation Engineering "
@@ -363,6 +364,7 @@ EXEMPLARS = {
         "email": "scopatz@cec.sc.edu",
         "employment": [
             {
+                "advisor": "sbillinge",
                 "begin_year": 2015,
                 "group": "ergs",
                 "location": "Columbia, SC",
@@ -376,7 +378,7 @@ EXEMPLARS = {
                 "position": "Assistant Professor, Mechanical Engineering " "Department",
             },
             {
-                "begin_year": 2013,
+                "advisor": "sbillinge","begin_year": 2013,
                 "begin_month": "Jun",
                 "begin_day": 1,
                 "end_year": 2015,
