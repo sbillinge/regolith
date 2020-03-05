@@ -1368,7 +1368,10 @@ SCHEMAS = {
             "schema": {
                 "type": "dict",
                 "schema": {
-                    "advisor": {"required": False, "type": "string"},
+                    "advisor": {"required": False, "type": "string",
+                                "description": "advisor/PI of the"
+                                               "education entry"
+                                },
                     "begin_day": {"required": False,
                                     "type": "integer"},
                     "begin_month": {"required": False,
@@ -1414,7 +1417,10 @@ SCHEMAS = {
             "schema": {
                 "type": "dict",
                 "schema": {
-                    "advisor": {"required": False, "type": "string"},
+                    "advisor": {"required": False, "type": "string",
+                                "description": "advisor/PI of the"
+                                               "employment entry"
+                                },
                     "begin_day": {"required": False, "type": "integer"},
                     "begin_month": {"required": False,
                                     "anyof_type": ["string", "integer"],
