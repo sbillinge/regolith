@@ -60,6 +60,7 @@ class RecentCollabsBuilder(LatexBuilderBase):
                 my_names = frozenset(p.get("aka", []) + [p["name"]])
                 pubs = filter_publications(self.gtx["citations"], my_names,
                                            reverse=True, bold=False)
+
                 my_collabs = []
                 for pub in pubs:
                     if is_since(pub.get("year"), since_date.year,
@@ -125,8 +126,8 @@ class RecentCollabsBuilder(LatexBuilderBase):
             emp = p.get("employment", [{"organization": "missing",
                                         "begin_year": 2019,}])
             emp.sort(key=ene_date_key, reverse=True)
-            if p.get("employment", "position") == "editor":
-                coeditors = p.get("employment", "co-workers")
+            if emp.get("coediters") != None:
+                my_coediters = emp.get("coediters")
             self.render(
                 "recentcollabs.csv",
                 p["_id"] + ".csv",
@@ -134,7 +135,8 @@ class RecentCollabsBuilder(LatexBuilderBase):
                 title=p.get("name", ""),
                 pubs=pubs,
                 employment=emp,
-                collabs=my_collabs
+                collabs=my_collabs,
+                coeditors = my_coediters
             )
 
     def make_bibtex_file(self, pubs, pid, person_dir="."):
