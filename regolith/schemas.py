@@ -1369,7 +1369,7 @@ SCHEMAS = {
                 "type": "dict",
                 "schema": {
                     "advisor": {"required": False, "type": "string",
-                                "description": "advisor/PI of the"
+                                "description": "advisor/mentor of the"
                                                "education entry"
                                 },
                     "begin_day": {"required": False,
@@ -1418,7 +1418,7 @@ SCHEMAS = {
                 "type": "dict",
                 "schema": {
                     "advisor": {"required": False, "type": "string",
-                                "description": "advisor/PI of the"
+                                "description": "advisor/mentor of the"
                                                "employment entry"
                                 },
                     "begin_day": {"required": False, "type": "integer"},
