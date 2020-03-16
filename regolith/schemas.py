@@ -364,7 +364,7 @@ EXEMPLARS = {
         "email": "scopatz@cec.sc.edu",
         "employment": [
             {
-                "advisor": "sbillinge",
+                "mentor": "sbillinge",
                 "begin_year": 2015,
                 "group": "ergs",
                 "location": "Columbia, SC",
@@ -378,7 +378,7 @@ EXEMPLARS = {
                 "position": "Assistant Professor, Mechanical Engineering " "Department",
             },
             {
-                "advisor": "sbillinge","begin_year": 2013,
+                "mentor": "sbillinge","begin_year": 2013,
                 "begin_month": "Jun",
                 "begin_day": 1,
                 "end_year": 2015,
@@ -1368,7 +1368,7 @@ SCHEMAS = {
             "schema": {
                 "type": "dict",
                 "schema": {
-                    "advisor": {"required": False, "type": "string",
+                    "mentor": {"required": False, "type": "string",
                                 "description": "advisor/mentor of the"
                                                "education entry"
                                 },
@@ -1417,7 +1417,7 @@ SCHEMAS = {
             "schema": {
                 "type": "dict",
                 "schema": {
-                    "advisor": {"required": False, "type": "string",
+                    "mentor": {"required": False, "type": "string",
                                 "description": "advisor/mentor of the"
                                                "employment entry"
                                 },
