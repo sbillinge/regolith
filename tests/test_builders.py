@@ -40,6 +40,7 @@ def prep_figure():
     if not db.get_file(db["groups"]["ergs"], "hello"):
         db.add_file(db["groups"]["ergs"], "hello", "fig/hello.txt")
 
+
 @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 @pytest.mark.parametrize("bm", builder_map)
 def test_builder(bm, make_db):
