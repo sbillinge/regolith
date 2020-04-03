@@ -9,14 +9,14 @@ from regolith.broker import load_db
 from regolith.main import main
 
 builder_map = [
-    #    "cv",
-    #    "html",
-    #    "resume",
-    #    "publist",
-    #    "current-pending",
-    #    "preslist",
-    #    "reimb",
-    #    "figure",
+    "cv",
+    "html",
+    "resume",
+    "publist",
+    "current-pending",
+    "preslist",
+    "reimb",
+    "figure",
     "recent-collabs"
 ]
 
