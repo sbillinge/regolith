@@ -1812,9 +1812,9 @@ SCHEMAS = {
             "type": "list",
         },
         "agency": {
-            "description": "currently nsf or doe",
+            "description": "currently nsf, doe or other",
             "type": "string",
-            "eallowed": ["nsf", "doe"],
+            "eallowed": ["nsf", "doe", "other"],
         },
         "competency_of_team": {
             "description": "Is the team competent",
