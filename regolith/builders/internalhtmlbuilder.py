@@ -18,8 +18,7 @@ from regolith.tools import (
 
 
 PROJ_URL_BASE = 'https://gitlab.thebillingegroup.com/talks/'
-
-
+#initial test
 class InternalHtmlBuilder(BuilderBase):
     """Build HTML files for website"""
 
