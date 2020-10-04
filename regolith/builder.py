@@ -16,6 +16,7 @@ from regolith.builders.coabuilder import RecentCollaboratorsBuilder
 from regolith.builders.beamplanbuilder import BeamPlanBuilder
 from regolith.builders.activitylogbuilder import ActivitylogBuilder
 from regolith.builders.internalhtmlbuilder import InternalHtmlBuilder
+from regolith.builders.grantreportbuilder import GrantReportBuilder
 
 
 BUILDERS = {
@@ -36,6 +37,7 @@ BUILDERS = {
     "resume": ResumeBuilder,
     "review-man": ManRevBuilder,
     "review-prop": PropRevBuilder,
+    "grantreport": GrantReportBuilder
 }
 
 
