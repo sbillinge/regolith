@@ -146,6 +146,9 @@ def filter_publications(citations, authors, reverse=False, bold=True,
     """
     pubs = []
     for pub in citations:
+#        if isinstance(pub.get("editor"),str):
+#            pub["editor"] = [pub.get("editor", [])]
+#            print(pub["editor"])
         if (
                 len((set(pub.get("author", [])) | set(
                     pub.get("editor", []))) & authors)
@@ -364,7 +367,6 @@ def filter_facilities(people, begin_period, type, verbose=False):
         if len(p['facilities']) > 0:
             facilities.append(p)
     return facilities
-
 
 def filter_patents(patentscoll, people, target, since=None, before=None):
     patents = []
@@ -600,19 +602,21 @@ def filter_presentations(people, presentations, institutions, target, types=["al
     # if specified, only list presentations in specified date ranges
     if since:
         for pres in thirdclean:
-            presdate = date((pres["begin_year"]),
-                            month_to_int(pres["begin_month"]),
-                            int(pres["begin_day"]))
-            if presdate > since:
+#            presdate = date((pres["begin_year"]),
+#                            month_to_int(pres["begin_month"]),
+#                            int(pres["begin_day"]))
+            presdate = get_dates(pres).get("begin_date")
+            if presdate >= since:
                 fourthclean.append(pres)
     else:
         fourthclean = thirdclean
     if before:
         for pres in fourthclean:
-            presdate = date((pres["begin_year"]),
-                            month_to_int(pres["begin_month"]),
-                            int(pres["begin_day"]))
-            if presdate < before:
+#            presdate = date((pres["begin_year"]),
+#                            month_to_int(pres["begin_month"]),
+#                            int(pres["begin_day"]))
+            presdate = get_dates(pres).get("begin_date")
+            if presdate <= before:
                 presclean.append(pres)
     else:
         presclean = fourthclean
@@ -641,12 +645,13 @@ def filter_presentations(people, presentations, institutions, target, types=["al
         ]
         authorlist = ", ".join(pres["authors"])
         pres["authors"] = authorlist
-        pres["begin_month"] = month_to_int(pres["begin_month"])
-        pres["date"] = date(
-            pres["begin_year"],
-            pres["begin_month"],
-            pres["begin_day"],
-        )
+        pres["begin_month"] = presdate.month
+#        pres["date"] = date(
+#            pres["begin_year"],
+#            pres["begin_month"],
+#            pres["begin_day"],
+#        )
+        pres["date"] = presdate
         for day in ["begin_day", "end_day"]:
             pres["{}_suffix".format(day)] = number_suffix(
                 pres.get(day, None)
