@@ -168,9 +168,15 @@ class MilestonesListerHelper(SoutHelperBase):
                                              "uuid": f"ko{projectum.get('_id')}"})
                 milestones = [projectum["kickoff"], projectum["deliverable"]]
             milestones.extend(projectum["milestones"])
-            milestones = [ms for ms in milestones if
-                              ms.get('status') in rc.stati
-                          ]
+            bad_milestone_types = [ms for ms in milestones if ms.get('status')
+                                   not in PROJECTUM_STATI]
+            bad_milestone_types_output = [f"{ms.get('name')}, {ms.get('uuid')}, "
+                                          f"{ms.get('status')}" for ms in
+                                          bad_milestone_types]
+            if bad_milestone_types:
+                print(f"WARNING: some milestones in {projectum.get('_id')} have "
+                      f"bad status types: ["
+                      f"{bad_milestone_types_output}]")
 
             for ms in milestones:
                 due_date = get_due_date(ms)
