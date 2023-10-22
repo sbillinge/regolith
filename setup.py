@@ -35,9 +35,9 @@ def main():
         license="CC0",
         version='0.5.1',
         author="Anthony Scopatz",
-        maintainer="Anthony Scopatz",
-        author_email="scopatz@gmail.com",
-        url="https://github.com/scopatz/regolith",
+        maintainer="Simon Billinge",
+        author_email="sb2896@columbia.edu",
+        url="https://github.com/regro/regolith",
         platforms="Cross Platform",
         python_requires='>=3.9',
         classifiers=["Programming Language :: Python :: 3"],
@@ -56,7 +56,7 @@ def main():
     )
     if HAVE_SETUPTOOLS:
         skw["setup_requires"] = []
-        # skw['install_requires'] = ['Jinja2', 'pymongo']
+    #     # skw['install_requires'] = ['Jinja2', 'pymongo']
 
     if platform.system().lower() in PW_AFFECTED_OSX_SYSTEMS:
     #The following lines find the python.app script, parses the script to find the path of its executable, and sets
