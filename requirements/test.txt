@@ -4,3 +4,4 @@ coverage
 codecov
 requests-mock
 pytest-mock
+rever

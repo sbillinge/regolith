@@ -1,17 +1,16 @@
 ruamel.yaml
-bibtexparser
-docutils
-python-dateutil
-jinja2
-cerberus
-xonsh
-rever
-openpyxl
 nameparser
 pandas
-pymongo
 matplotlib-base
+python-dateutil
+pymongo
+docutils
+bibtexparser
+jinja2
+cerberus
 habanero
+openpyxl
 google-api-python-client
 google-auth-oauthlib
+xonsh
 
