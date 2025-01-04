@@ -23,4 +23,7 @@ build
 	  --people PEOPLE [PEOPLE ...]
 	                        specify a person or a space-separated list of people such that the build will be for only those people
 	  --kwargs KWARGS [KWARGS ...]
-	                        pass a specific command to build a specific task if it exists
+	                        Pass a list of key:value pairs to pass through to the builder. As an example, the publist builder
+                                understands a filter for facility, so if we want publications from the NSLSII facility we
+                                would type "regolith build publist --kwargs facility:nslsii". If the passed kwarg is
+                                not understood it will be ignored.

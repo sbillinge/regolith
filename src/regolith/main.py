@@ -153,7 +153,10 @@ def create_parser():
         "--kwargs",
         nargs="+",
         dest="kwargs",
-        help="pass a specific command to build a specific task " "if it exists",
+        help="Pass a list of key:value pairs to pass through to the builder. As an example, "
+        "the publist builder understands a filter for facility, so if we want publications"
+        "from the NSLSII facility we would type 'regolith build publist --kwargs facility:nslsii'."
+        "If the passed kwarg is not understood it will be ignored.",
         default=None,
     )
 
