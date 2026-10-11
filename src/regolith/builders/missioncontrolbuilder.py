@@ -566,23 +566,23 @@ class MissionControlBuilder(BuilderBase):
         ]
         goals = in_document_order(mine, order, lambda g: g["_id"])
         goal_number = self.number_goals(goals, number_of)
-        theirs = {g["_id"] for g in goals}
+        their_goals = {goal["_id"] for goal in goals}
         tasks = [
-            t
-            for t in live(self.gtx["mc_tasks"])
-            if t["goal"] in theirs or (of_no_goal(t) and t.get("lead") == self.owner(person))
+            task
+            for task in live(self.gtx["mc_tasks"])
+            if task["goal"] in their_goals or (of_no_goal(task) and task.get("lead") == self.owner(person))
         ]
         on_deck = self.on_deck(tasks)
         # what hangs under something finished goes with it: a finished goal
         # keeps no tasks, and a finished task keeps no sub tasks
-        finished_goals = {g["_id"] for g in goals if g["status"] == "finished"}
+        finished_goals = {goal["_id"] for goal in goals if goal["status"] == "finished"}
         weekly = [
-            t
-            for t in tasks
-            if t["_id"] not in on_deck and t["goal"] in goal_number and t["goal"] not in finished_goals
+            task
+            for task in tasks
+            if task["_id"] not in on_deck and task["goal"] in goal_number and task["goal"] not in finished_goals
         ]
-        weekly = [t for t in weekly if not self.under_something_finished(t, weekly)]
-        held = [t for t in tasks if t["_id"] in on_deck]
+        weekly = [task for task in weekly if not self.under_something_finished(task, weekly)]
+        held = [task for task in tasks if task["_id"] in on_deck]
         self.left_out[person] = self.not_written(person, {p["_id"] for p in projects}, goal_number, weekly + held)
 
         lines = [f"# Mission control — {self.display_name(person)}", ""]
@@ -597,24 +597,12 @@ class MissionControlBuilder(BuilderBase):
     @staticmethod
     def on_deck(tasks):
         """Return the ids of the tasks on deck, with everything under
-        them.
-
-        Parameters
-        ----------
-        tasks : list of dict
-            The tasks to look through.
-
-        Returns
-        -------
-        set of str
-            The ids held out of the weeks.
-        """
-        held = {t["_id"] for t in tasks if t["status"] == "on-deck"}
-        growing = True
-        while growing:
-            under = {t["_id"] for t in tasks if t["_id"] not in held and t.get("parent") in held}
-            held |= under
-            growing = bool(under)
+        them."""
+        held = {task["_id"] for task in tasks if task["status"] == "on-deck"}
+        pieces = True
+        while pieces:
+            pieces = {task["_id"] for task in tasks if task["_id"] not in held and task.get("parent") in held}
+            held |= pieces
         return held
 
     @staticmethod
@@ -798,14 +786,14 @@ class MissionControlBuilder(BuilderBase):
         list of str
             The lines of the section.
         """
-        shown = {t["_id"] for t in tasks}
+        shown = {task["_id"] for task in tasks}
         children = defaultdict(list)
         for task in tasks:
             parent = task.get("parent")
             children[parent if parent in shown else None].append(task)
         lines = ["## On-deck tasks", ""]
         counts = defaultdict(int)
-        for task in in_document_order(children[None], order, lambda t: t["_id"]):
+        for task in in_document_order(children[None], order, lambda task: task["_id"]):
             number = ""
             if task["goal"] in goal_number:
                 counts[task["goal"]] += 1

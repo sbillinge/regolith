@@ -476,8 +476,6 @@ HELD_HEADINGS = {
     "backburner": "wishlist",
     "wishlist": "wishlist",
 }
-# what a goal says instead of a project, and a task instead of a goal, when
-# it is not of one yet
 UNASSIGNED_PROJECT = "tbd"
 UNASSIGNED_GOAL = "tbd"
 WEEK_HEADING = re.compile(r"^Week of\s+(?P<monday>\d{4}-\d{2}-\d{2})$")
@@ -923,8 +921,7 @@ class _Reader:
             "status": "finished" if (struck_out or ticked) else self.goal_status(struck_out),
         }
         if held:
-            # a number on the wishlist is whatever the line was pasted down
-            # with, and is not read: the numbers of a period move
+            # the number is not read: the numbers of a period move
             if under is not None:
                 goal["parent"] = under["_id"]
             self.goal_stack.append((indent, goal))
@@ -972,11 +969,7 @@ class _Reader:
             task["parent"] = parent["_id"]
             if "goal" in parent:
                 task["goal"] = parent["goal"]
-        elif held:
-            # a number on deck is whatever the line was pasted down with, and
-            # is not read: the numbers of a period move
-            pass
-        else:
+        elif not held:
             task_number = found.group("number")
             if task_number is None:
                 raise DocumentError(
@@ -1365,9 +1358,8 @@ def _rolled(copy, first, later, records, adopted):
 
 
 def _settle_pieces(records, link, unassigned_link, person):
-    """Give a piece pasted under a held line the link of the line above
-    it, and whatever is of nothing yet the person whose document it is
-    in."""
+    """Link a piece to what the line above it is of, and whatever is of
+    nothing yet to the person whose document it is in."""
     by_id = {record["_id"]: record for record in records}
     for record in records:
         above = by_id.get(record.get("parent"))
