@@ -1,4 +1,8 @@
-from regolith.schemas import _update_dict_target, insert_alloweds
+import warnings
+
+import pytest
+
+from regolith.schemas import SCHEMAS, _update_dict_target, insert_alloweds, load_exemplars, validate
 
 
 def test_update_dict_target():
@@ -35,6 +39,27 @@ def test_update_dict_target():
     first_cut = _update_dict_target(doc, {"eallowed": "TEST"}, ["string", "float"])
     actual = _update_dict_target(first_cut, {"eallowed": "TEST2"}, "string")
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "status, expected_warning",
+    [
+        # C1: grant with status accepted, expect no warning about the status
+        ("accepted", False),
+        # C2: grant with status finished, expect no warning about the status
+        ("finished", False),
+        # C3: grant with a status that is not allowed, expect a warning about the status
+        ("not-a-status", True),
+    ],
+)
+def test_grant_status_values(status, expected_warning):
+    # Test that a grant status outside GRANT_STATI is flagged and one inside it is not
+    grant = dict(load_exemplars()["grants"][0], status=status)
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        validate("grants", grant, SCHEMAS)
+    actual_warning = any("not in the preferred entries" in str(w.message) for w in caught)
+    assert actual_warning is expected_warning
 
 
 def test_insert_alloweds():

@@ -39,7 +39,7 @@ alloweds = {
         "teaching_wish",
         "research_wish",
     ],
-    "GRANT_STATI": ["pending", "declined", "accepted", "in-prep"],
+    "GRANT_STATI": ["pending", "declined", "accepted", "in-prep", "finished"],
     "GRANT_ROLES": ["pi", "copi", "co-pi"],
     "SLIDE_TYPES": [
         "text",

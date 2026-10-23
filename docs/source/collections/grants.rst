@@ -63,6 +63,7 @@ The following lists key names mapped to its type and meaning for each entry.
 		* declined
 		* accepted
 		* in-prep
+		* finished
 :team: list, information about the team members participating in the grant., required
 
 	:type: dict, optional
