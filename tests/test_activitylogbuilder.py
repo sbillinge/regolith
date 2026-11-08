@@ -1,6 +1,10 @@
+from pathlib import Path
+
 import pytest
 
 from regolith.builders.activitylogbuilder import published_or_non_article
+from regolith.builders.basebuilder import LatexBuilderBase
+from regolith.main import main
 
 ARTICLE_WITH_DOI = {"_id": "article-with-doi", "entrytype": "article", "doi": "10.1/a"}
 ARTICLE_WITHOUT_DOI = {"_id": "article-without-doi", "entrytype": "article"}
@@ -33,3 +37,20 @@ BOOK_WITHOUT_DOI = {"_id": "book-without-doi", "entrytype": "book"}
 def test_published_or_non_article(publications, expected_ids):
     actual_ids = [pub["_id"] for pub in published_or_non_article(publications)]
     assert actual_ids == expected_ids
+
+
+# Test that the LaTeX run for the annual activity report names the .tex file
+# the builder wrote, so the PDF can be made
+def test_annual_activity_pdf_names_the_written_tex_file(make_db, monkeypatch):
+    latex_commands = []
+
+    def record(self, cmd):
+        latex_commands.append((Path(self.bldir), cmd))
+
+    monkeypatch.setattr(LatexBuilderBase, "run", record)
+    monkeypatch.chdir(make_db)
+    main(["build", "annual-activity", "--people", "sbillinge", "--from", "2017-04-01"])
+    tex_files = [bldir / arg for bldir, cmd in latex_commands for arg in cmd if arg.endswith(".tex")]
+    assert tex_files
+    for tex_file in tex_files:
+        assert tex_file.is_file()

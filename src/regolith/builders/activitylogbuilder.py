@@ -451,4 +451,4 @@ class ActivitylogBuilder(LatexBuilderBase):
             licenses=licenses,
             hindex=hindex,
         )
-        self.pdf(f"{pi['_id']}-ann-report.tex")
+        self.pdf(f"{pi['_id']}-ann-report")
